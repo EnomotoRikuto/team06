@@ -37,10 +37,24 @@ Characterを継承
 クラス
 Stage
 担当者
-
+笹田明希
 属性
+.stageNumber
+.ememy(enemyclassからもらう)
+.background
+.scere
+.lives
+.Obstacle
+.BGM
 
 メソッド
+display()	背景や敵などステージに関係するものを描画
+isStageClear()	ステージがクリア条件を満たしているか判定
+start()	ステージを初期化・開始する
+end()	ステージ終了処理を行う
+reset(int initial)	初期残機数にリセット
+isGameOver()	残機が0以下かどうかを判定
+display()	残機数を画面に表示する
 
 メモ
 ステージごとの設定(BGMの設定・背景画像の読み込み・スコア表示・残機の表示・ステージ数の表示)
