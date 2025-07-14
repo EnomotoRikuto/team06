@@ -1,0 +1,269 @@
+PImage stageBg;
+ArrayList<Stage> stages = new ArrayList<Stage>();
+int currentStageIndex = 0;
+boolean showClearText = false;
+int clearTextTimer = 0;
+
+void setup() {
+  size(800, 600);
+
+  // 仮の背景画像（単色）
+  stageBg = createImage(width, height, RGB);
+  stageBg.loadPixels();
+  for (int i = 0; i < stageBg.pixels.length; i++) {
+    stageBg.pixels[i] = color(50, 100, 200);
+  }
+  stageBg.updatePixels();
+
+  // ステージを3つ作成
+  for (int i = 1; i <= 3; i++) {
+    stages.add(new Stage(i, stageBg, null));
+  }
+
+  // 最初のステージ開始
+  stages.get(currentStageIndex).start();
+}
+
+void draw() {
+  background(0);
+  Stage currentStage = stages.get(currentStageIndex);
+  currentStage.display();
+
+  if (currentStage.isGameOver()) {
+    fill(255, 0, 0);
+    textSize(40);
+    text("GAME OVER", width / 2 - 100, height / 2);
+    noLoop();
+  } else if (currentStage.isStageClear()) {
+    showClearText = true;
+    clearTextTimer++;
+
+    fill(0, 255, 0);
+    textSize(40);
+    text("STAGE CLEAR!", width / 2 - 120, height / 2);
+
+    if (clearTextTimer > 120) {
+      clearTextTimer = 0;
+      showClearText = false;
+      currentStageIndex++;
+      if (currentStageIndex < stages.size()) {
+        stages.get(currentStageIndex).start();
+      } else {
+        fill(255, 255, 0);
+        text("ALL STAGES CLEAR!", width / 2 - 150, height / 2 + 50);
+        noLoop();
+      }
+    }
+  }
+}
+
+void keyPressed() {
+  Stage currentStage = stages.get(currentStageIndex);
+  if (key == ' ' && currentStage.isBossStage && currentStage.boss != null) {
+    currentStage.boss.takeDamage(5);
+    println("Boss hit! HP: " + currentStage.boss.hp);
+  }
+}
+
+// -------------------- Stage Class --------------------
+
+class Stage {
+  int stageNumber;
+  PImage background;
+  Score score;
+  Lives lives;
+  ArrayList<Enemy> enemies;
+  ArrayList<Obstacle> obstacles;
+  Object bgm;
+
+  boolean isBossStage = false;
+  Boss boss = null;
+
+  Stage(int num, PImage bg, Object music) {
+    stageNumber = num;
+    background = bg;
+    score = new Score();
+    lives = new Lives();
+    enemies = new ArrayList<Enemy>();
+    obstacles = new ArrayList<Obstacle>();
+    bgm = music;
+    isBossStage = (stageNumber == 3);  // ステージ3はボス戦
+  }
+
+  void start() {
+    lives.reset(3);
+    score.reset();
+    enemies.clear();
+    obstacles.clear();
+    boss = null;
+
+    println("BGMはスキップ");
+
+    if (isBossStage) {
+      boss = new Boss(width / 2, -100);
+    } else {
+      int enemyCount = int(random(3, 6)) + stageNumber;
+      for (int i = 0; i < enemyCount; i++) {
+        float ex = random(50, width - 50);
+        enemies.add(new Enemy(ex, -random(100, 600)));
+      }
+      for (int i = 0; i < 3; i++) {
+      float ox = random(100, width - 140);  
+      float oy = random(100, height - 140);
+      obstacles.add(new Obstacle(ox, oy));
+    }
+    }
+  }
+
+  void end() {
+    println("BGM終了（ダミー）");
+  }
+
+  boolean isStageClear() {
+    if (isBossStage) {
+      return boss != null && boss.isDefeated();
+    } else {
+      return enemies.size() == 0;
+    }
+  }
+
+  boolean isGameOver() {
+    return lives.count <= 0;
+  }
+
+  void display() {
+    if (background != null) {
+      image(background, 0, 0, width, height);
+    }
+
+    for (int i = enemies.size() - 1; i >= 0; i--) {
+      Enemy e = enemies.get(i);
+      e.display();
+      if (e.y > height) {
+        enemies.remove(i);
+      }
+    }
+
+    if (isBossStage && boss != null) {
+      boss.display();
+    }
+
+    for (Obstacle o : obstacles) {
+      o.display();
+    }
+
+    score.display();
+    lives.display();
+
+    fill(255);
+    textSize(16);
+    text("STAGE: " + stageNumber, width - 120, 30);
+  }
+}
+
+// -------------------- Score Class --------------------
+
+class Score {
+  int value = 0;
+
+  void add(int points) {
+    value += points;
+  }
+
+  void reset() {
+    value = 0;
+  }
+
+  void display() {
+    fill(255);
+    textSize(20);
+    text("SCORE: " + value, 20, 30);
+  }
+}
+
+// -------------------- Lives Class --------------------
+
+class Lives {
+  int count = 3;
+
+  void lose() {
+    count--;
+  }
+
+  void reset(int initial) {
+    count = initial;
+  }
+
+  void display() {
+    fill(255);
+    textSize(20);
+    text("LIVES: " + count, 20, 60);
+  }
+}
+
+// -------------------- Enemy クラス --------------------
+
+class Enemy {
+  float x, y;
+
+  Enemy(float startX, float startY) {
+    x = startX;
+    y = startY;
+  }
+
+  void display() {
+    fill(255, 0, 0);
+    ellipse(x, y, 30, 30);
+    y += 2;
+  }
+}
+
+// -------------------- Boss クラス（Enemy を拡張） --------------------
+
+class Boss extends Enemy {
+  int hp = 30;
+
+  Boss(float startX, float startY) {
+    super(startX, startY);
+  }
+
+  @Override
+  void display() {
+    fill(255, 100, 0);
+    ellipse(x, y, 100, 100);
+    y += 1;
+
+    // HPバー
+    fill(255);
+    rect(x - 50, y - 70, 100, 10);
+    fill(255, 0, 0);
+    rect(x - 50, y - 70, map(hp, 0, 30, 0, 100), 10);
+  }
+
+  void takeDamage(int dmg) {
+    hp -= dmg;
+    if (hp < 0) hp = 0;
+  }
+
+  boolean isDefeated() {
+    return hp <= 0;
+  }
+}
+
+// -------------------- Obstacle クラス（仮） --------------------
+
+class Obstacle {
+  float x, y;
+  float w = 40;
+  float h = 40;
+
+  Obstacle(float x_, float y_) {
+    x = x_;
+    y = y_;
+  }
+
+  void display() {
+    fill(100, 200, 100);
+    rect(x, y, w, h);
+  }
+}
