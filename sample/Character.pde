@@ -3,10 +3,9 @@ class Character {
   PImage img;      // キャラクターの画像
   PVector position; // キャラクターの位置 (x, y座標)
   
-  // 残機（ライフ）。子クラスで具体的な値を設定します。
+  // 残機（ライフ）。子クラスで具体的な値を設定
   int lives;
 
-  // コンストラクタ：オブジェクトが作られるときに最初に呼ばれる部分
   Character(String imagePath, float x, float y) {
     
     // 画像ファイルを読み込み、img変数に格納する
@@ -15,7 +14,7 @@ class Character {
     // 位置ベクトルを、引数で受け取ったx, yで初期化する
     this.position = new PVector(x, y);
     
-    // 残機を0で初期化（この後、子クラスで上書きする）
+    // 残機を0で初期化
     this.lives = 0;
   }
 
