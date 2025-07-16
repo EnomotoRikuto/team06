@@ -6,7 +6,7 @@ Stage stage;
 void setup() {
     size(800, 600);
     // プレイヤーを初期化
-    player = new Player("宇宙船.jpg", 400, 300, 3);
+    player = new Player("宇宙船.png", 400, 300, 3);
     // 弾配列
     bulletArray = new Bullet[20];
     bulletIndex = 0;
