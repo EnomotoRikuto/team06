@@ -163,11 +163,11 @@ class Stage {
     Enemy createRandomEnemy() {
         float speed = random(2, 6);
         if (speed <= 4) {
-            return new Enemy("宇宙人1.jpg", speed, 100, 100);
+            return new Enemy("宇宙人1.png", speed, 100, 100);
         } else if (speed <= 5) {
-            return new Enemy("宇宙人2.jpg", speed, 50, 50);
+            return new Enemy("宇宙人2.png", speed, 50, 50);
         } else {
-            return new Enemy("宇宙人3.jpg", speed, 10, 10);
+            return new Enemy("宇宙人3.png", speed, 10, 10);
         }
     }
 }
