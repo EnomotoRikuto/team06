@@ -18,52 +18,69 @@ void setup() {
     stage.start();
 }
 
-// --- draw() 内の該当箇所だけ抜粋して示します ---
+// app.pde に、このdraw関数を丸ごと貼り付けてください
+
 void draw() {
-
-    // ステージ描画（背景・敵・障害物・UI）
+   println("フレーム開始時のHP: " + player.lives);
+    // 1. ステージ関連の描画とゲームオーバー判定
     stage.display(player);
+
+    // ゲームオーバー状態なら、ここで描画処理を中断
+    if (stage.gameOver || stage.gameClear) {
+        return;
+    }
+
+    // 2. プレイヤーの描画
     player.display();
+    
+    // 3. プレイヤーと障害物の当たり判定
+    for (int i = 0; i < stage.obstacles.size(); i++) {
+        Obstacle o = stage.obstacles.get(i);
+        player.colisionObstacle(o);
+    }
 
-    // （省略：障害物との当たり判定）
+    // 4. プレイヤーと敵・ボスの衝突判定 (弾とは完全に独立)
+    // このループは1フレームで1回だけ実行されます
+    if (stage.isBossStage) {
+        if (stage.boss != null) {
+            player.colision(stage.boss);
+        }
+    } else {
+        for (Enemy e : stage.enemies) {
+            player.colision(e);
+        }
+    }
 
-    // 弾の移動と当たり判定（1体ヒットで弾も消滅）
+    // 5. 弾の移動と、"弾"と"敵"の当たり判定
     for (int j = 0; j < bulletArray.length; j++) {
         Bullet bullet = bulletArray[j];
-        if (bullet != null) {
-            bullet.move();
+        if (bullet == null) {
+            continue; // 弾が存在しない場合は次の弾へ
+        }
 
-            if (!stage.isBossStage) {
-                // 通常ステージの敵判定
-                for (int k = stage.enemies.size() - 1; k >= 0; k--) {
-                    Enemy enemy = stage.enemies.get(k);
-                    if (enemy != null) {
-                        player.colision(enemy);
-                        if (player.scoreFunc(bullet, enemy)) {
-                            stage.enemies.remove(k);
-                            bulletArray[j] = null;
-                            break;
-                        }
-                    }
+        bullet.move();
+
+        if (!stage.isBossStage) {
+            // 通常ステージ：弾と敵の当たり判定
+            for (int k = stage.enemies.size() - 1; k >= 0; k--) {
+                Enemy enemy = stage.enemies.get(k);
+                if (player.scoreFunc(bullet, enemy)) {
+                    stage.enemies.remove(k); // 敵を削除
+                    bulletArray[j] = null;   // 弾を削除
+                    break;                   // この弾の処理は終わり
                 }
-
-            } else {
-                // ボスステージの判定
-                Boss boss = stage.boss;
-                if (boss != null) {
-                    player.colision(boss);
-                    // ダメージを与えるだけにして、boss=null は削除
-                    if (player.scoreFunc(bullet, boss)) {
-                        bulletArray[j] = null;
-                        // ボスは内部でライフが 0 以下になれば isDefeated() が true になる想定
-                        break;
-                    }
+            }
+        } else {
+            // ボスステージ：弾とボスの当たり判定
+            if (stage.boss != null) {
+                if (player.scoreFunc(bullet, stage.boss)) {
+                    bulletArray[j] = null; // 弾だけを削除
                 }
             }
         }
     }
 
-    // ステージクリア判定 → 次ステージへ（ボスステージは除外）
+    // 6. ステージクリア判定
     if (!stage.isBossStage && stage.isStageClear()) {
         player.score = 0;
         stage.end();
@@ -85,7 +102,6 @@ void draw() {
         stage.start();
     }
 }
-
 void keyPressed() {
     // プレイヤー移動
     player.move();
@@ -107,6 +123,11 @@ void mousePressed() {
     if (stage.gameOver) {
         if (mouseX > stage.btnX && mouseX < stage.btnX + stage.btnW &&
             mouseY > stage.btnY && mouseY < stage.btnY + stage.btnH) {
+            // 弾配列をリセット
+            for (int i = 0; i < bulletArray.length; i++) {
+                bulletArray[i] = null;
+            }
+            bulletIndex = 0;
             // Player を復活（体力フル回復・位置リセット）
             player = new Player("宇宙船.png", 400, 300, 3);
             stage.start();
