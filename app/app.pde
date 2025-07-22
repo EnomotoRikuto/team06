@@ -108,7 +108,7 @@ void mousePressed() {
         if (mouseX > stage.btnX && mouseX < stage.btnX + stage.btnW &&
             mouseY > stage.btnY && mouseY < stage.btnY + stage.btnH) {
             // Player を復活（体力フル回復・位置リセット）
-            player = new Player("宇宙船.jpg", 400, 300, 3);
+            player = new Player("宇宙船.png", 400, 300, 3);
             stage.start();
             loop();   // 描画再開
         }
