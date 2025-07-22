@@ -1,28 +1,33 @@
 import java.util.ArrayList;
 
+// 敵生成パターン定義（enumで管理）
+enum EnemyPattern {
+  RANDOM,
+  LINE
+}
+
 class Stage {
     int stageNumber;
     PImage background;
     ArrayList<Enemy> enemies;
     ArrayList<Obstacle> obstacles;
     Object bgm;
+    boolean triggered = false;
 
     boolean isBossStage;
     Boss boss;
 
-    // ゲームオーバーフラグ
     boolean gameOver;
-    // ゲームクリアフラグ（追加）
     boolean gameClear;
 
-    // Continueボタン領域
     int btnX, btnY, btnW, btnH;
 
-    // スクロール用変数
-    float scrollSpeed = 2.0;
+    float scrollSpeed = 2.0f;
     float yOffset = 0;
     float lineSpacing = 50;
     float dashLength = 20;
+
+    EnemyPattern currentPattern;  // 敵生成パターン管理用変数
 
     Stage(int num, String img, Object music) {
         stageNumber = num;
@@ -33,12 +38,14 @@ class Stage {
         isBossStage = (stageNumber == 5);
         boss        = null;
         gameOver    = false;
-        // ゲームクリア初期化
         gameClear   = false;
         btnW = 120;
         btnH = 40;
-        btnX = width/2 - btnW/2;
-        btnY = height/2 + 50;
+        btnX = width - btnW - 20;
+        btnY = height - btnH - 20;
+
+        // 敵生成パターンの初期値をランダムに設定
+        currentPattern = EnemyPattern.RANDOM;
     }
 
     void start() {
@@ -46,15 +53,43 @@ class Stage {
         obstacles.clear();
         boss      = null;
         gameOver  = false;
-        gameClear = false;  // ステージ開始時にリセット
+        gameClear = false;
         println("BGMはスキップ");
-        if (isBossStage) {
-            boss = new Boss("dog.png", width/2, -150, 1.5, 30);
+
+        // ここでcurrentPatternを確率で切り替える
+        float r = random(1);
+        if (r < 0.7) {  // 70%の確率でLINEパターンにする
+            currentPattern = EnemyPattern.LINE;
         } else {
-            int enemyCount = int(random(3, 6)) + stageNumber;
-            for (int i = 0; i < enemyCount; i++) {
-                enemies.add(createRandomEnemy());
+            currentPattern = EnemyPattern.RANDOM;
+        }
+
+        if (isBossStage) {
+            boss = new Boss("dog.png", width/2, -150, 1.5f, 30);
+        } else {
+            switch(currentPattern) {
+                case RANDOM:
+                    int enemyCount = int(random(3, 6)) + stageNumber;
+                    for (int i = 0; i < enemyCount; i++) {
+                        enemies.add(createRandomEnemy());
+                    }
+                    break;
+
+                case LINE:
+                    int numEnemies = 10;  // 10体横一列
+                    float spacing = width / (numEnemies + 1);
+                    for (int i = 0; i < numEnemies; i++) {
+                        float x = spacing * (i + 1);
+                        float y = -50;
+                        float speed = 2.0f;
+                        Enemy e = new Enemy("宇宙人1.png", speed, 50, 50);
+                        e.position.x = x;
+                        e.position.y = y;
+                        enemies.add(e);
+                    }
+                    break;
             }
+
             for (int i = 0; i < 3; i++) {
                 float ox = random(100, width - 140);
                 float oy = random(100, height - 140);
@@ -67,7 +102,6 @@ class Stage {
         println("BGM終了（ダミー）");
     }
 
-    // ステージクリア判定（変更なし）
     boolean isStageClear() {
         if (isBossStage) {
             return (boss != null && boss.isDefeated());
@@ -76,13 +110,11 @@ class Stage {
         }
     }
 
-    // スクロール更新
     void updateScroll() {
         yOffset = (yOffset + scrollSpeed) % lineSpacing;
     }
 
     void display(Player player) {
-        // 体力チェック
         if (player.lives <= 0) {
             gameOver = true;
         }
@@ -91,7 +123,6 @@ class Stage {
             return;
         }
 
-        // ボスステージでボス撃破したらゲームクリア
         if (isBossStage && boss != null && boss.isDefeated()) {
             gameClear = true;
         }
@@ -100,15 +131,12 @@ class Stage {
             return;
         }
 
-        // スクロール更新
         updateScroll();
 
-        // 背景画像描画
         if (background != null) {
             image(background, 0, 0, width, height);
         }
 
-        // 敵・障害物描画
         if (isBossStage) {
             if (boss != null) boss.display();
         } else {
@@ -124,7 +152,6 @@ class Stage {
             }
         }
 
-        // UI描画（スクリーン固定）
         fill(255, 0, 0);
         textSize(30);
         textAlign(LEFT, TOP);
@@ -133,7 +160,6 @@ class Stage {
         text("HP: " + player.lives, 10, 70);
     }
 
-    // Game Over 表示
     void displayGameOver() {
         fill(0, 150);
         rect(0, 0, width, height);
@@ -145,11 +171,10 @@ class Stage {
         rect(btnX, btnY, btnW, btnH, 8);
         fill(0);
         textSize(20);
-        text("Continue", width/2, btnY + btnH/2);
+        text("Continue", btnX + btnW/2, btnY + btnH/2);
         noLoop();
     }
 
-    // Game Clear 表示（追加）
     void displayGameClear() {
         fill(0, 150);
         rect(0, 0, width, height);
