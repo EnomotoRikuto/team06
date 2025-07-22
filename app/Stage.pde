@@ -156,7 +156,7 @@ class Stage {
         fill(255);
         textSize(64);
         textAlign(CENTER, CENTER);
-        text(""GAME CLEAR", width/2, height/2 - 40);
+        text("GAME CLEAR", width/2, height/2 - 40);
         noLoop();
     }
 
