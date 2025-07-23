@@ -33,6 +33,6 @@
 スコアを表示する
 
 # 発表資料のリンク
-https://ehimeuniv-my.sharepoint.com/:p:/r/personal/k520199z_mails_cc_ehime-u_ac_jp/Documents/
+https://ehimeuniv-my.sharepoint.com/:p:/g/personal/k520199z_mails_cc_ehime-u_ac_jp/Ebis8oWhAPdPgUruHZDPLhsBA14KGRO19UfcJuFCy1o0fw?e=3KKCMj
 
 
