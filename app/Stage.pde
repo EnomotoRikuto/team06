@@ -25,7 +25,7 @@ class Stage {
   PApplet parent;      // SoundFile生成用
   SoundFile bgm;       // BGM本体
   String    bgmPath;   // ファイルパスを保持
-  float     bgmVolume = 0.7; // 音量(0.0〜1.0)
+  float     bgmVolume = 0.5; // 音量(0.0〜1.0)
 
   Stage(PApplet parent, int num, String img, String bgmPath) { // ★ コンストラクタ変更
     this.parent = parent;
