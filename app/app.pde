@@ -12,7 +12,7 @@ void setup() {
     bulletIndex = 0;
     textAlign(CENTER, CENTER);
     // ステージを初期化
-    stage = new Stage(1, "太陽系.jpg", null);
+    stage = new Stage(this, 1, "太陽系.jpg", "maou_bgm_8bit29.mp3");
     stage.start();
 }
 
@@ -93,16 +93,16 @@ void draw() {
         stage.stageNumber++;
         switch (stage.stageNumber) {
             case 2:
-                stage = new Stage(stage.stageNumber, "地球.jpg", null);
+                stage = new Stage(this,stage.stageNumber, "地球.jpg","maou_bgm_8bit27.mp3");
                 break;
             case 3:
-                stage = new Stage(stage.stageNumber, "月.jpg", null);
+                stage = new Stage(this,stage.stageNumber, "月.jpg","maou_bgm_8bit25.mp3");
                 break;
             case 4:
-                stage = new Stage(stage.stageNumber, "火星.jpg", null);
+                stage = new Stage(this,stage.stageNumber, "火星.jpg", "maou_bgm_8bit23.mp3");
                 break;
             default:
-                stage = new Stage(stage.stageNumber, "太陽.jpg", null);
+                stage = new Stage(this,stage.stageNumber, "太陽.jpg", "maou_bgm_8bit21.mp3");
                 break;
         }
         stage.start();
