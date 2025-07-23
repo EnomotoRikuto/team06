@@ -74,7 +74,7 @@ class Stage {
       for (int i = 0; i < enemyCount; i++) {
         enemies.add(createRandomEnemy());
       }
-      int obstacleCount = 3 + stageNumber - 1;  // ステージ1→3個、ステージ2→4個、ステージ3→5個…
+      int obstacleCount = stageNumber;  // ステージ1→1個、ステージ2→2個... ステージ4→4個
 for (int i = 0; i < obstacleCount; i++) {
     float ox = random(100, width - 140);
     float oy = random(100, height - 140);
