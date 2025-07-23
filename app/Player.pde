@@ -52,7 +52,7 @@ class Player extends Character {
       + (character.position.y - this.position.y) * (character.position.y - this.position.y) < 1000) {
       this.lives--;
       this.invincible = true;
-      this.invincibleTimer = 120;
+      this.invincibleTimer = 40;
       // デバッグ用: 衝突時のHPを表示
       println("衝突！敵と接触。残りHP: " + this.lives);
     }
@@ -65,7 +65,7 @@ class Player extends Character {
       + (obstacle.y - (this.position.y + 50)) * (obstacle.y - (this.position.y + 50)) < 1000) {
       this.lives--;
       this.invincible = true;
-      this.invincibleTimer = 120;
+      this.invincibleTimer = 40;
       // デバッグ用: 衝突時のHPを表示
       println("衝突！障害物と接触。残りHP: " + this.lives);
     }
