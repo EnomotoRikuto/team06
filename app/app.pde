@@ -2,6 +2,7 @@ Player player;
 Bullet[] bulletArray;
 int  bulletIndex;
 Stage stage;
+SoundFile hitSfx;
 
 void setup() {
     size(800, 600);
@@ -13,12 +14,15 @@ void setup() {
     textAlign(CENTER, CENTER);
     // ステージを初期化
     stage = new Stage(this, 1, "太陽系.jpg", "maou_bgm_8bit29.mp3");
+    hitSfx = new SoundFile(this, "キャンセル3.mp3");
+    player.setHitSound(hitSfx);
     stage.start();
 }
 
 void draw() {
     // デバッグ用: フレーム開始時のHPを表示
     println("フレーム開始時のHP: " + player.lives);
+    println("BGMの音量:"+stage.bgm.bgmVolume);
 
     // 1. ステージ関連の描画（背景、敵、UIなど）とゲームオーバー判定
     stage.display(player);
@@ -121,6 +125,13 @@ void keyPressed() {
             bulletIndex = 0;
         }
     }
+    else if(key=='u'){
+      stage.bgm.soundVolume(1);
+    }
+    else if(key=='d'){
+      stage.bgm.soundVolume(0);
+    }
+    stage.bgm.soundCheck();
 }
 
 // マウスクリックで Continue ボタン判定
@@ -137,6 +148,11 @@ void mousePressed() {
 
             // Player を復活
             player = new Player("宇宙船.png", 400, 300, 3);
+            hitSfx = new SoundFile(this,"キャンセル3.mp3");
+            player.setHitSound(hitSfx);
+            if(stage.gameOverBgm!=null){
+              stage.gameOverBgm.stopMusic();
+            }
             stage.start();
             loop();   // 描画再開
         }

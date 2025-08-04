@@ -4,6 +4,8 @@ import processing.sound.*;   // ★ 追加
 class Stage {
   // ---------- 元々のメンバ ----------
   int stageNumber;
+  String gameClearPath="大勢で拍手.mp3";
+  String gameOverPath="落ち込む.mp3";
   PImage background;
   ArrayList<Enemy> enemies;
   ArrayList<Obstacle> obstacles;
@@ -21,14 +23,9 @@ class Stage {
   float lineSpacing = 50;
   float dashLength = 20;
 
-  // ---------- ★ 追加/変更部分 ----------
-  PApplet parent;      // SoundFile生成用
-  SoundFile bgm;       // BGM本体
-  String    bgmPath;   // ファイルパスを保持
-  float     bgmVolume = 0.5; // 音量(0.0〜1.0)
-
-  Stage(PApplet parent, int num, String img, String bgmPath) { // ★ コンストラクタ変更
-    this.parent = parent;
+  Bgm bgm,clearBgm,gameOverBgm;
+ 
+ Stage(PApplet parent, int num, String img, String bgmPath) { // ★ コンストラクタ変更
     stageNumber = num;
     background  = loadImage(img);
     enemies     = new ArrayList<Enemy>();
@@ -42,12 +39,9 @@ class Stage {
     btnH = 40;
     btnX = width/2 - btnW/2;
     btnY = height/2 + 50;
-
-    this.bgmPath = bgmPath;
-    if (bgmPath != null) {
-      bgm = new SoundFile(parent, bgmPath);
-      bgm.amp(bgmVolume);
-    }
+    bgm=new Bgm(parent,bgmPath);
+    clearBgm=new Bgm(parent,gameClearPath);
+    gameOverBgm=new Bgm(parent,gameOverPath);
   }
 
   void start() {
@@ -60,12 +54,12 @@ class Stage {
     // ---------- ★ BGM再生 ----------
     if (bgm != null) {
       // 念のため一度止めてから
-      bgm.stop();
+      bgm.stopMusic();
       // ループ再生開始
-      bgm.loop();
+      bgm.loopMusic();
     }
 
-    println("BGM再生開始: " + bgmPath);
+    println("BGM再生開始: " +bgm.bgmPath);
 
     if (isBossStage) {
       boss = new Boss("dog.png", width/2, -150, 1.5, 30);
@@ -74,19 +68,20 @@ class Stage {
       for (int i = 0; i < enemyCount; i++) {
         enemies.add(createRandomEnemy());
       }
-      int obstacleCount = stageNumber;  // ステージ1→1個、ステージ2→2個... ステージ4→4個
-for (int i = 0; i < obstacleCount; i++) {
-    float ox = random(100, width - 140);
-    float oy = random(100, height - 140);
-    obstacles.add(new Obstacle(ox, oy, 50));
-}
+      for (int i = 0; i < 3; i++) {
+        float ox = random(100, width - 140);
+        float oy = random(100, height - 140);
+        obstacles.add(new Obstacle(ox, oy,"隕石.png"));
+      }
     }
   }
 
   void end() {
     println("BGM終了");
-    if (bgm != null) bgm.stop();
+    if (bgm != null){
+      bgm.stopMusic();
   }
+ }
 
   boolean isStageClear() {
     if (isBossStage) {
@@ -106,6 +101,7 @@ for (int i = 0; i < obstacleCount; i++) {
       gameOver = true;
     }
     if (gameOver) {
+      
       displayGameOver();
       return;
     }
@@ -153,8 +149,10 @@ for (int i = 0; i < obstacleCount; i++) {
 
   void displayGameOver() {
     // ★ BGM停止（必要ならフェードアウト実装可）
-    if (bgm != null) bgm.stop();
-
+    if (bgm != null){
+      bgm.stopMusic();
+    }
+    gameOverBgm.playMusic();
     fill(0, 150);
     rect(0, 0, width, height);
     fill(255);
@@ -168,11 +166,14 @@ for (int i = 0; i < obstacleCount; i++) {
     text("Continue", width/2, btnY + btnH/2);
     noLoop();
   }
+  
 
   void displayGameClear() {
     // ★ BGM停止
-    if (bgm != null) bgm.stop();
-
+    if (bgm != null){
+      bgm.stopMusic();
+    }
+    clearBgm.playMusic();
     fill(0, 150);
     rect(0, 0, width, height);
     fill(255);

@@ -1,15 +1,12 @@
 class Obstacle {
+  PImage obs;
   float x, y;
-  int r;
-
-  Obstacle(float x_, float y_,int r) {
-    x = x_;
-    y = y_;
-    this.r=r;
+  Obstacle(float x, float y,String obs_path) {
+    this.x=x;
+    this.y=y;
+    obs=loadImage(obs_path);
   }
-
   void display() {
-    fill(100, 200, 100);
-    ellipse(x, y, 3*r,r);
+    image(obs,x,y,100,100);
   }
 }

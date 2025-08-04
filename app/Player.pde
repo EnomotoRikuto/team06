@@ -1,10 +1,11 @@
+import processing.sound.*;
 class Player extends Character {
   int score;
   
   // 無敵時間用の変数
   boolean invincible;
   int invincibleTimer;
-
+  SoundFile hitSound;
   Player(String imgpath, float x, float y, int lives) {
     super(imgpath, x, y);
     this.lives = lives;
@@ -13,6 +14,25 @@ class Player extends Character {
     // 無敵時間用の変数を初期化
     this.invincible = false;
     this.invincibleTimer = 0;
+  }
+  
+  // 効果音をセット（外部から一度だけ）
+  void setHitSound(SoundFile s) {
+    hitSound = s;
+    if (hitSound != null) {
+      // 必要なら音量調整（例: 少し下げる）
+      hitSound.amp(1);
+    }
+  }
+
+  // 効果音再生（重なり防止）
+  void playHitSound() {
+    if (hitSound != null) {
+      if (hitSound.isPlaying()) {
+        hitSound.stop();
+      }
+      hitSound.play();
+    }
   }
 
   void display() {
@@ -52,7 +72,8 @@ class Player extends Character {
       + (character.position.y - this.position.y) * (character.position.y - this.position.y) < 1000) {
       this.lives--;
       this.invincible = true;
-      this.invincibleTimer = 120;
+      this.invincibleTimer = 30;
+      this.playHitSound();
       // デバッグ用: 衝突時のHPを表示
       println("衝突！敵と接触。残りHP: " + this.lives);
     }
@@ -61,11 +82,12 @@ class Player extends Character {
   void colisionObstacle(Obstacle obstacle) {
     if (this.invincible) return;
 
-    if ((obstacle.x - (this.position.x + 50)) * (obstacle.x - (this.position.x + 50)) 
-      + (obstacle.y - (this.position.y + 50)) * (obstacle.y - (this.position.y + 50)) < 1000) {
+    if ((obstacle.x - this.position.x) * (obstacle.x - this.position.x) 
+      + (obstacle.y - this.position.y) * (obstacle.y - this.position.y) < 1000) {
       this.lives--;
       this.invincible = true;
-      this.invincibleTimer = 120;
+      this.invincibleTimer = 30;
+      playHitSound();
       // デバッグ用: 衝突時のHPを表示
       println("衝突！障害物と接触。残りHP: " + this.lives);
     }
@@ -89,7 +111,8 @@ class Player extends Character {
     if (distanceSq < radiiSq) {
       this.lives--;
       this.invincible = true;
-      this.invincibleTimer = 120;
+      this.invincibleTimer = 30;
+      playHitSound();
       // デバッグ用: 衝突時のHPを表示
       println("衝突！ボスの弾に接触。残りHP: " + this.lives);
       return true;
@@ -101,7 +124,7 @@ class Player extends Character {
     if (((character.position.x + 50) - bullet.x) * ((character.position.x - 50) - bullet.x) 
       + ((character.position.y + 50) - bullet.y) * ((character.position.y + 50) - bullet.y) < 1000) {
       character.lives--;
-      this.score += 10;
+      this.score += 5;
       return true;
     }
     return false;
